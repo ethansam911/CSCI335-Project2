@@ -1,6 +1,19 @@
+/**
+    Name: Ethan Sam 
+	Date: 3/11/2019
+	Professor: Ioannis Stamos
+	Class: CSCI 335
+	
+	Header file: avl_tree_modified.h
+	
+	This AvlTree Class is the same same as "avl_tree.h," but also 
+	contains a direct implementation for double rotations
+	
+	
+ Few comments describing the class AvlTree
+**/
 #ifndef AVL_TREE_H
 #define AVL_TREE_H
-
 #include "dsexceptions.h"
 #include "sequence_map.h" 
 #include <algorithm>
@@ -457,7 +470,7 @@ class AvlTree
         k1->right = k2;
         k2->height = max( height( k2->left ), height( k2->right ) ) + 1;
         k1->height = max( height( k1->left ), k2->height ) + 1;
-        k2 = k1;
+        k2 = k1;	
     }
 
     /**
@@ -475,6 +488,7 @@ class AvlTree
         k1 = k2;
     }
 
+
     /**
      * Double rotate binary tree node: first left child.
      * with its right child; then node k3 with new left child.
@@ -482,11 +496,26 @@ class AvlTree
      * Update heights, then set new root.
      */
     void doubleWithLeftChild( AvlNode * & k3 )
-    {
-        rotateWithRightChild( k3->left );
-        rotateWithLeftChild( k3 );
-    }
-
+	{
+	// Left -> Right
+	AvlNode *k2 = k3->left->right;
+	AvlNode *k1 = k3->left;
+	k3->left = k2->right;
+	k2->right = k3;
+	k1->right = k2->left;
+	k2->left = k1;
+	
+	//Adjust the height of k1, k2, and k3 after the double rotation is finished
+	k1->height = max( height( k1->left ), height(k1->right) ) + 1; 
+	k3->height = max( height( k3->left ), height(k3->right ) ) + 1;
+	k2->height = max( height( k2->right ), height( k2->right ) ) + 1;
+	
+	//Set subtree k1 and k3 to the root: k2
+	k1 = k2;
+	k3 = k2;
+    }	
+		
+		  
     /**
      * Double rotate binary tree node: first right child.
      * with its left child; then node k1 with new right child.
@@ -494,10 +523,24 @@ class AvlTree
      * Update heights, then set new root.
      */
     void doubleWithRightChild( AvlNode * & k1 )
-    {
-        rotateWithLeftChild( k1->right );
-        rotateWithRightChild( k1 );
-    }
+	{
+	// Right -> Left
+	AvlNode *k2 = k1->right->left;
+	AvlNode *k3 = k1->right;
+	k3->left = k2->right;
+	k2->right = k3;
+	k1->right = k2->left;
+	k2->left = k1;
+	
+	//Adjust the height of k1, k2, and k3 after the double rotation is finished
+	k1->height = max( height( k1->left ), height( k1->right ) ) + 1;
+	k3->height = max( height( k3->left ), height( k3->right ) ) + 1;
+	k2->height = max( height( k2->left ), height( k2->right ) ) + 1;
+	
+	//Set subtree k1 and k3 to the root: k2
+	k1 = k2;
+	k3 = k2;
+	}
 };
 
 #endif

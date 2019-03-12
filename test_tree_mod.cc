@@ -1,20 +1,16 @@
-/**
-    Name: Ethan Sam 
-	Date: 3/11/2019
-	Professor: Ioannis Stamos
-	Class: CSCI 335
-	
-	Header file: query_tree.cc
-	
-	This file takes two files as arguments: "rebase210.txt" and "sequences.txt"
-	The contents of "rebase210.txt" are read and the file contents of "sequences.txt" 
-	are queried 
-	
-	
- Few comments describing the class test_tree.cc
-**/	
-//File for part 2b
-#include "avl_tree.h"
+// Ethan Sam
+// Professor: Ioannis Stamos
+// Homework: 2
+// File: test_tree_mod.cc
+// Main file for Part2(c) of Homework 2.
+/*
+
+	This file tests the "avl_tree_modified.h" for its implementation
+	of double rotations for right and left child
+
+*/
+//File for part 2C
+#include "avl_tree_modified.h"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -23,29 +19,29 @@
 #include "sequence_map.h"
 using namespace std;
 
-namespace {
+namespace {  
 
 
 template<class TreeType>
 void ConstructTree( TreeType &a_tree, const string& db_filename ) 
 {
-    ifstream input_stream(db_filename);
-    if (!input_stream.good())
+    ifstream input_file(db_filename);
+    if (!input_file.good())
 	{
-        cerr << ".... ERROR ...." << endl;
+        cerr << ".... error condition ...." << endl;
 	}
     string line;
-    while (getline(input_stream, line)) 
+    while (getline(input_file, line)) 
 	{
         if (line[line.length()-1] != '/' && line[line.length()-2] != '/')
 		{
             continue;
 		}
-        stringstream line_stream; 
-        line_stream << line;
+        stringstream ss;
+        ss << line;
         vector<string> sequences;
         string word;
-        while (getline(line_stream, word
+        while (getline(ss, word,'/'))
 		{
            sequences.push_back(word);
 		}
@@ -55,7 +51,7 @@ void ConstructTree( TreeType &a_tree, const string& db_filename )
             a_tree.insert(a_map);
         }
     }
-    input_stream.close();
+    input_file.close();
 }
 
 template<class TreeType>
@@ -63,33 +59,31 @@ int CountSuccessfulQueries( const TreeType &a_tree, const string &db_filename )
 {
     ifstream myFile(db_filename);
     string word;
-    int count_success = 0;
+    int countSuccess = 0;
     // temp_counter is needed for ".contains" to work
     int temp_counter = 0;
     while(myFile >> word) 
 	{
-		//We need a SequenceMap object to allow contains to work 
-        SequenceMap map(word, "");  
+        SequenceMap map(word, ""); //We need a SequenceMap object to allow contains to work  
         bool success = a_tree.contains(map, temp_counter);
         if (success)
 		{
-            count_success++;
+            countSuccess++;
 		}
 	}
     myFile.close();
-    return count_success;
+    return countSuccess;
 
 }
 
 template<class TreeType>
-int CountFindRecursionCalls( const TreeType &a_tree, const string &db_filename ) {
+int CountRecursionCalls( const TreeType &a_tree, const string &db_filename ) {
     ifstream myFile(db_filename);
     string word;
     int find_counter = 0;
     while(myFile >> word) 
 	{
-        SequenceMap map(word, ""); 
-		//We need a SequenceMap object to allow contains to work  
+        SequenceMap map(word, ""); //We need a SequenceMap object to allow contains to work  
         a_tree.contains(map, find_counter);
     }
     myFile.close();
@@ -106,25 +100,29 @@ int CountRemoveEveryotherSequences( TreeType &a_tree, const string& seq_filename
     // we have to pass it in the function
     // in order to keep the function prototype correct
     int temp_counter = 0;
-    int state = 1;
-    while(getline(myFile, word)) {
-        if(state%2 == 0) {
+    int alternate = 1;
+    while(getline(myFile, word)) 
+	{
+        if(alternate%2 == 0) 
+		{
             SequenceMap map(word, "");
             if (a_tree.contains(map, temp_counter))
 			{
                 a_tree.remove(map, delete_counter);
             }
-            state++; // the next iteration will skip this if statement
+            alternate++; // the next iteration will skip this if statement
                     // since it becomes an odd integer.
         }
         else
-            state++;
+		{
+            alternate++;
+		}
     }
     myFile.close();
-    return delete_counter;
+    return delete_counter;      
 }
 
-
+ 
 // @db_filename: an input database filename.
 // @seq_filename: an input sequences filename.
 // @a_tree: an input tree of the type TreeType. It is assumed to be
@@ -137,7 +135,7 @@ void TestTree(const string &db_filename, const string &seq_filename, TreeType &a
 		//1
         ConstructTree(a_tree, db_filename);
 		//2
-        int total_nodes = a_tree.countNodes();
+        int total_nodes = a_tree.countNodes(); 
 		cout << "2: " << total_nodes << endl;
 		
 		//3a
@@ -152,9 +150,9 @@ void TestTree(const string &db_filename, const string &seq_filename, TreeType &a
 		int succesful_queries = CountSuccessfulQueries(a_tree, seq_filename);
         cout << "4a: " << succesful_queries << endl;
         
-
+ 
 		//4b  (Uses successful_queries)
-		int find_counter = CountFindRecursionCalls(a_tree, seq_filename);
+		int find_counter = CountRecursionCalls(a_tree, seq_filename);
 		cout << "4b: " << float(find_counter) / succesful_queries << endl;
 
         //5a  "CountRemoveEveryotherSequences" needs to be called to update "a_tree"
@@ -177,9 +175,9 @@ void TestTree(const string &db_filename, const string &seq_filename, TreeType &a
 
 }
 
-}// namespace
+}  // namespace
 
-
+// Sample main for program testTrees
 int main(int argc, char **argv) 
 {
     if (argc != 3) 
@@ -190,7 +188,7 @@ int main(int argc, char **argv)
     string db_filename(argv[1]);
     string seq_filename(argv[2]);
 	cout << "Input file is " << db_filename << ", and sequences file is " << seq_filename << endl;
-	cout << "Type of Tree is AVL" <<endl;
+
     if (seq_filename == "sequences.txt") 
 	{
     AvlTree<SequenceMap> a_tree;
@@ -199,5 +197,3 @@ int main(int argc, char **argv)
 
     return 0;
 }
-
-
